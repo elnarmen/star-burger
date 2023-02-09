@@ -6,7 +6,7 @@ media/
 __pycache__/
 *.py[cod]
 *$py.class
-
+.idea/
 # C extensions
 *.so
 
