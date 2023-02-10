@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
+from rest_framework import status
 
 from .models import Product, Order, OrderProduct
 
@@ -61,22 +61,41 @@ def product_list_api(request):
 @api_view(['POST'])
 def register_order(request):
     try:
-        decoded_responce = request.data
-        print(decoded_responce)
+        decoded_response = request.data
     except ValueError:
         return Response({'error': 'bla bla bla'})
+    if not decoded_response.get('products'):
+        return Response(
+            {'products': 'Обязательное поле.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    if decoded_response['products'] is None:
+        return Response(
+            {'products': 'Это поле не может быть пустым.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    if not isinstance(decoded_response['products'], list):
+        return Response(
+            {'products': 'Ожидался list со значениями, но был получен "str".'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    if not len(decoded_response['products']):
+        return Response(
+            {'products': 'Этот список не может быть пустым.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     order = Order.objects.create(
-        firstname=decoded_responce['firstname'],
-        lastname=decoded_responce['lastname'],
-        phonenumber=decoded_responce['phonenumber'],
-        address=decoded_responce['address']
+        firstname=decoded_response['firstname'],
+        lastname=decoded_response['lastname'],
+        phonenumber=decoded_response['phonenumber'],
+        address=decoded_response['address']
     )
     order_products = [
         OrderProduct.objects.create(
             product=Product.objects.get(id=product['product']),
             quantity=product['quantity'],
             order=order
-        ) for product in decoded_responce['products']
+        ) for product in decoded_response['products']
     ]
 
