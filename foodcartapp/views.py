@@ -74,3 +74,4 @@ def register_order(request):
         for fields in serializer.validated_data['products']
     ]
 
+    return Response(serializer.data, status=200)
