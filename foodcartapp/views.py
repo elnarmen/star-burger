@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import OrderSerializer
 from .models import Product, Order, OrderProduct
+from django.shortcuts import get_object_or_404
 
 
 def banners_list_api(request):
@@ -68,10 +69,13 @@ def register_order(request):
         phonenumber=serializer.validated_data['phonenumber'],
         address=serializer.validated_data['address']
     )
-
-    products = [
-        OrderProduct.objects.create(order=order, **fields)
-        for fields in serializer.validated_data['products']
-    ]
+    for product_item in serializer.validated_data['products']:
+        product = get_object_or_404(Product, pk=product_item['product'].id)
+        OrderProduct.objects.create(
+                order=order,
+                price=product.price * product_item['quantity'],
+                product=product,
+                quantity=product_item['quantity']
+            )
 
     return Response(serializer.data, status=200)
