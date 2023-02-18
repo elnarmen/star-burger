@@ -137,6 +137,11 @@ class Order(models.Model):
         ('D', 'Выполнен')
     )
 
+    PAYMENT_METHOD_CHOICES = (
+        ('C', 'Наличными'),
+        ('E', 'Электронно'),
+    )
+
     firstname = models.CharField(
         max_length=255,
         verbose_name='Имя',
@@ -149,12 +154,23 @@ class Order(models.Model):
         db_index=True
     )
     phonenumber = PhoneNumberField(db_index=True)
-    address = models.CharField(max_length=255, verbose_name='Адрес', db_index=True)
+    address = models.CharField(
+        max_length=255,
+        verbose_name='Адрес',
+        db_index=True
+    )
     status = models.CharField(
         max_length=1,
         verbose_name='Статус',
         choices=STATUS_CHOICES,
         default='A',
+        db_index=True
+    )
+    payment_method = models.CharField(
+        max_length=1,
+        verbose_name='Способ оплаты',
+        choices=PAYMENT_METHOD_CHOICES,
+        default='C',
         db_index=True
     )
     comment = models.TextField(
