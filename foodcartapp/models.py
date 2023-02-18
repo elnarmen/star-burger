@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models import Sum, F
+from django.utils import timezone
 
 class Restaurant(models.Model):
     name = models.CharField(
@@ -136,8 +137,17 @@ class Order(models.Model):
         ('D', 'Выполнен')
     )
 
-    firstname = models.CharField(max_length=255, verbose_name='Имя', null=False, db_index=True)
-    lastname = models.CharField(max_length=255, verbose_name='Фамилия', db_index=True)
+    firstname = models.CharField(
+        max_length=255,
+        verbose_name='Имя',
+        null=False,
+        db_index=True
+    )
+    lastname = models.CharField(
+        max_length=255,
+        verbose_name='Фамилия',
+        db_index=True
+    )
     phonenumber = PhoneNumberField(db_index=True)
     address = models.CharField(max_length=255, verbose_name='Адрес', db_index=True)
     status = models.CharField(
@@ -147,8 +157,31 @@ class Order(models.Model):
         default='A',
         db_index=True
     )
+    comment = models.TextField(
+        max_length=255,
+        verbose_name='Комментарий',
+        blank=True
+    )
+    creation_at = models.DateTimeField(
+        default=timezone.now,
+        verbose_name='Время создания',
+        db_index=True
+
+    )
+    called_at = models.DateTimeField(
+        verbose_name='Время звонка',
+        blank=True,
+        null=True,
+        db_index=True
+    )
+    delivered_at = models.DateTimeField(
+        verbose_name='Время доставки',
+        blank=True,
+        null=True,
+        db_index=True
+    )
+
     objects = OrderQuerySet.as_manager()
-    comment = models.TextField(max_length=255, verbose_name='Комментарий', blank=True)
 
     class Meta:
         verbose_name = 'заказ'
