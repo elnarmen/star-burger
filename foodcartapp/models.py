@@ -140,8 +140,15 @@ class Order(models.Model):
     lastname = models.CharField(max_length=255, verbose_name='Фамилия', db_index=True)
     phonenumber = PhoneNumberField(db_index=True)
     address = models.CharField(max_length=255, verbose_name='Адрес', db_index=True)
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A', db_index=True)
+    status = models.CharField(
+        max_length=1,
+        verbose_name='Статус',
+        choices=STATUS_CHOICES,
+        default='A',
+        db_index=True
+    )
     objects = OrderQuerySet.as_manager()
+    comment = models.TextField(max_length=255, verbose_name='Комментарий', blank=True)
 
     class Meta:
         verbose_name = 'заказ'
