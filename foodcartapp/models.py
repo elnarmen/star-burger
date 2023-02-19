@@ -2,7 +2,11 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models import Sum, F
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.utils import timezone
+from django.db.models import Prefetch
+
 
 class Restaurant(models.Model):
     name = models.CharField(
@@ -124,11 +128,6 @@ class RestaurantMenuItem(models.Model):
         return f"{self.restaurant.name} - {self.product.name}"
 
 
-class OrderQuerySet(models.QuerySet):
-    def total_price(self):
-        self.annotate(total_price=Sum('products__price'))
-
-
 class Order(models.Model):
     STATUS_CHOICES = (
         ('A', 'Необработан'),
@@ -196,8 +195,15 @@ class Order(models.Model):
         null=True,
         db_index=True
     )
-
-    objects = OrderQuerySet.as_manager()
+    restaurant = models.ForeignKey(
+        Restaurant,
+        verbose_name='Ресторан',
+        related_name='orders',
+        on_delete=models.SET_NULL,
+        default=None,
+        blank=True,
+        null=True
+    )
 
     class Meta:
         verbose_name = 'заказ'
@@ -205,6 +211,11 @@ class Order(models.Model):
 
     def __str__(self):
         return f'{self.firstname} {self.lastname} {self.address.split(", ")[0]}'
+
+    def save(self, *args, **kwargs):
+        if self.restaurant and self.status == 'A':
+            self.status = 'B'
+        super().save(*args, **kwargs)
 
 
 class OrderProduct(models.Model):
@@ -220,7 +231,7 @@ class OrderProduct(models.Model):
     order = models.ForeignKey(
         Order,
         verbose_name='заказ',
-        related_name='products',
+        related_name='order_items',
         on_delete=models.CASCADE,
     )
     price = models.DecimalField(
@@ -236,3 +247,4 @@ class OrderProduct(models.Model):
 
     def __str__(self):
         return f'{self.product} {self.quantity} шт.'
+
