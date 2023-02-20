@@ -27,7 +27,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
-    'rest_framework'
+    'rest_framework',
+    'placesapp'
 ]
 
 MIDDLEWARE = [
@@ -124,4 +125,4 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "bundles"),
 ]
 
-GEOCODER_API_KEY = env.str('GEOCODER_API_KEY')
+YA_GEOCODER_API_KEY = env.str('YA_GEOCODER_API_KEY')

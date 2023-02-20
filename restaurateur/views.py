@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Sum
 from django.conf import settings
-
+from django.utils import timezone
 import requests
 from geopy import distance
 
@@ -13,6 +13,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
+from placesapp.models import Place
 
 
 class Login(forms.Form):
@@ -112,6 +113,30 @@ def fetch_coordinates(apikey, address):
     return lon, lat
 
 
+def get_place_coords(address):
+    geocoder_key = settings.YA_GEOCODER_API_KEY
+
+    place, created = Place.objects.get_or_create(
+        address=address,
+    )
+
+    if not created:
+        return place.longitude, place.latitude
+
+    place_coords = fetch_coordinates(
+        geocoder_key, address
+    )
+
+    if not place_coords:
+        place.delete()
+        return None
+
+    place.longitude, place.latitude = place_coords
+    place.update_time = timezone.now()
+    place.save()
+    return place.latitude, place.longitude
+
+
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     orders = Order.objects.annotate(total_cost=Sum('order_items__price'))\
@@ -136,13 +161,13 @@ def view_orders(request):
                 order.restaurants = set(product_restaurants)
                 continue
             order.restaurants &= set(product_restaurants)
-        customer_coords = fetch_coordinates(settings.GEOCODER_API_KEY, order.address)
+
+        customer_coords = get_place_coords(order.address)
         if not customer_coords:
             order.restaurant_distances_flag = False
         else:
             for restaurant in order.restaurants:
-                restaurant_coords = fetch_coordinates(
-                    settings.GEOCODER_API_KEY,
+                restaurant_coords = get_place_coords(
                     restaurant.address
                 )
                 restaurant.distance = round(
