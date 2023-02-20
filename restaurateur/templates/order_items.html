@@ -42,9 +42,13 @@
             <details>
               <summary><b>Подходящие рестораны:</b></summary>
               <ul>
-                {% for restaurant in item.restaurants %}
-                  <li>{{ restaurant }}</li>
-                {% endfor %}
+                {% if not item.restaurant_distances_flag %}
+                  <p>Ошибка определения координат</p>
+                {% else %}
+                  {% for restaurant in item.restaurants %}
+                      <li>{{ restaurant }} - {{ restaurant.distance }} км</li>
+                  {% endfor %}
+                {% endif %}
               </ul>
             </details>
           {% else %}

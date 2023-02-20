@@ -4,9 +4,13 @@ from django.views import View
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Sum
+from django.conf import settings
+
+import requests
+from geopy import distance
+
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
-
 
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
 
@@ -90,6 +94,24 @@ def view_restaurants(request):
     })
 
 
+def fetch_coordinates(apikey, address):
+    base_url = "https://geocode-maps.yandex.ru/1.x"
+    response = requests.get(base_url, params={
+        "geocode": address,
+        "apikey": apikey,
+        "format": "json",
+    })
+    response.raise_for_status()
+    found_places = response.json()['response']['GeoObjectCollection']['featureMember']
+
+    if not found_places:
+        return None
+
+    most_relevant = found_places[0]
+    lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
+    return lon, lat
+
+
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     orders = Order.objects.annotate(total_cost=Sum('order_items__price'))\
@@ -102,16 +124,32 @@ def view_orders(request):
 
     for order in orders:
         order.restaurants = set()
+        order.restaurant_distances_flag = True
         for order_item in order.order_items.all():
+
             product_restaurants = [
                 restaurant_item.restaurant for restaurant_item in restaurant_menu_items
                 if restaurant_item.product.id == order_item.product.id
             ]
+
             if not order.restaurants:
                 order.restaurants = set(product_restaurants)
                 continue
             order.restaurants &= set(product_restaurants)
+        customer_coords = fetch_coordinates(settings.GEOCODER_API_KEY, order.address)
+        if not customer_coords:
+            order.restaurant_distances_flag = False
+        else:
+            for restaurant in order.restaurants:
+                restaurant_coords = fetch_coordinates(
+                    settings.GEOCODER_API_KEY,
+                    restaurant.address
+                )
+                restaurant.distance = round(
+                    distance.distance(customer_coords, restaurant_coords).km, 2
+                )
 
+            order.restaurants = sorted(order.restaurants, key=lambda x: x.distance)
     return render(
         request,
         template_name='order_items.html',
