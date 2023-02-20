@@ -114,7 +114,7 @@ def fetch_coordinates(apikey, address):
 
 
 def get_place_coords(address):
-    geocoder_key = settings.YA_GEOCODER_API_KEY
+    geocoder_key = settings.YANDEX_GEOCODER_API_KEY
 
     place, created = Place.objects.get_or_create(
         address=address,
