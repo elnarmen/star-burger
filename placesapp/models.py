@@ -18,7 +18,7 @@ class Place(models.Model):
         blank=True,
         null=True
     )
-    update_time = models.DateTimeField('Дата последнего обновления', default=timezone.now)
+    update_at = models.DateTimeField('Дата последнего обновления', default=timezone.now)
 
     class Meta:
         verbose_name = 'Место'
