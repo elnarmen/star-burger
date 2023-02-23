@@ -152,7 +152,7 @@ class Order(models.Model):
         verbose_name='Фамилия',
         db_index=True
     )
-    phonenumber = PhoneNumberField(db_index=True)
+    phonenumber = PhoneNumberField(verbose_name='номер телефона', db_index=True)
     address = models.CharField(
         max_length=255,
         verbose_name='Адрес',
