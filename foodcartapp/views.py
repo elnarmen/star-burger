@@ -75,7 +75,7 @@ def register_order(request):
         product = get_object_or_404(Product, pk=product_item['product'].id)
         OrderProduct.objects.create(
                 order=order,
-                price=product.price * product_item['quantity'],
+                total_price=product.price * product_item['quantity'],
                 product=product,
                 quantity=product_item['quantity']
             )

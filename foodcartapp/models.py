@@ -234,8 +234,9 @@ class OrderProduct(models.Model):
         related_name='order_items',
         on_delete=models.CASCADE,
     )
-    price = models.DecimalField(
-        'цена',
+
+    total_price = models.DecimalField(
+        'цена для общего количества одинаковых продуктов',
         max_digits=8,
         decimal_places=2,
         validators=[MinValueValidator(0)]
