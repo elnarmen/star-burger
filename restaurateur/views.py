@@ -96,9 +96,9 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders = Order.objects.annotate(total_cost=Sum('order_items__total_price'))\
+    orders = Order.objects.annotate(total_cost=Sum('items__total_price'))\
         .exclude(status='D')\
-        .prefetch_related('restaurant', 'order_items', 'order_items__product')\
+        .prefetch_related('cooking_restaurant', 'items', 'items__product')\
         .order_by('status')
 
     restaurant_menu_items = RestaurantMenuItem.objects.filter(availability=True)\
@@ -107,7 +107,7 @@ def view_orders(request):
     for order in orders:
         order.restaurants = set()
         order.restaurant_distances_flag = True
-        for order_item in order.order_items.all():
+        for order_item in order.items.all():
 
             product_restaurants = [
                 restaurant_item.restaurant for restaurant_item in restaurant_menu_items

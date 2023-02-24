@@ -209,10 +209,9 @@ class Order(models.Model):
     def __str__(self):
         return f'{self.firstname} {self.lastname} {self.address.split(", ")[0]}'
 
-    def save(self, *args, **kwargs):
-        if self.restaurant and self.status == 'A':
+    def clean(self):
+        if self.cooking_restaurant and self.status == 'A':
             self.status = 'B'
-        super().save(*args, **kwargs)
 
 
 class OrderProduct(models.Model):
