@@ -13,7 +13,7 @@ from django.contrib.auth import views as auth_views
 
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
 from placesapp.models import Place
-from placesapp.views import fetch_coordinates, get_place_coords
+from placesapp.location_utils import fetch_coordinates, get_place_coords
 
 class Login(forms.Form):
     username = forms.CharField(
