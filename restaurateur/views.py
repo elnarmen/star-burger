@@ -120,18 +120,19 @@ def view_orders(request):
             order.restaurants &= set(product_restaurants)
 
         customer_coords = get_place_coords(order.address)
-        if not customer_coords:
+        if None in customer_coords:
             order.restaurant_distances_flag = False
         else:
+            order.restaurant_distances = []
             for restaurant in order.restaurants:
                 restaurant_coords = get_place_coords(
                     restaurant.address
                 )
-                restaurant.distance = round(
+                restaurant_distance = round(
                     distance.distance(customer_coords, restaurant_coords).km, 2
                 )
-
-            order.restaurants = sorted(order.restaurants, key=lambda x: x.distance)
+                order.restaurant_distances.append([restaurant.name, restaurant_distance])
+            order.restaurant_distances.sort(key=lambda x: x[1])
     return render(
         request,
         template_name='order_items.html',

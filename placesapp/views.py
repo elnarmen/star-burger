@@ -1,3 +1,5 @@
+import requests
+from django.utils import timezone
 from django.shortcuts import render
 from django.conf import settings
 from placesapp.models import Place
@@ -27,17 +29,16 @@ def get_place_coords(address):
     place, created = Place.objects.get_or_create(
         address=address,
     )
-
     if not created:
-        return place.longitude, place.latitude
+        return place.latitude, place.longitude
 
     place_coords = fetch_coordinates(
         geocoder_key, address
     )
 
     if not place_coords:
-        place.delete()
-        return None
+        place.longitude = place.latitude = None
+        return place.latitude, place.longitude
 
     place.longitude, place.latitude = place_coords
     place.update_time = timezone.now()

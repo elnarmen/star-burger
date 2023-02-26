@@ -45,8 +45,8 @@
                 {% if not item.restaurant_distances_flag %}
                   <p>Ошибка определения координат</p>
                 {% else %}
-                  {% for restaurant in item.restaurants %}
-                      <li>{{ restaurant }} - {{ restaurant.distance }} км</li>
+                  {% for restaurant_name, distance in item.restaurant_distances %}
+                      <li>{{ restaurant_name }} - {{ distance }} км</li>
                   {% endfor %}
                 {% endif %}
               </ul>
