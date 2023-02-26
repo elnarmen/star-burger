@@ -71,13 +71,13 @@ def register_order(request):
         phonenumber=serializer.validated_data['phonenumber'],
         address=serializer.validated_data['address']
     )
-    for product_item in serializer.validated_data['products']:
-        product = get_object_or_404(Product, pk=product_item['product'].id)
-        OrderProduct.objects.create(
-                order=order,
-                total_price=product.price * product_item['quantity'],
-                product=product,
-                quantity=product_item['quantity']
-            )
+    order_products = [OrderProduct(
+        order=order,
+        total_price=product_item['product'].price * product_item['quantity'],
+        product=product_item['product'],
+        quantity=product_item['quantity']
+    ) for product_item in serializer.validated_data['products']]
+
+    OrderProduct.objects.bulk_create(order_products)
 
     return Response(serializer.data, status=200)
