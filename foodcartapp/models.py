@@ -220,14 +220,14 @@ class Order(models.Model):
                 settings.YANDEX_GEOCODER_API_KEY,
                 self.address
             )
-        place, created = Place.objects.get_or_create(address=self.address)
 
-        if created:
-            if not place_coords:
-                place.latitude = place.longitude = None
-                place.update_time = timezone.now()
-                return
-            place.latitude, place.longitude = place_coords
+        place, _ = Place.objects.get_or_create(address=self.address)
+        if not place_coords:
+            place.latitude = place.longitude = None
+            place.update_time = timezone.now()
+            return
+        place.latitude, place.longitude = place_coords
+        place.save()
 
 
 class OrderProduct(models.Model):
