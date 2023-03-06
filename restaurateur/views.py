@@ -116,8 +116,8 @@ def view_orders(request):
         for order_item in order.items.all():
 
             product_restaurants = [
-                restaurant_item.restaurant for restaurant_item in restaurant_menu_items
-                if restaurant_item.product.id == order_item.product.id
+                rest_item.restaurant for rest_item in restaurant_menu_items
+                if rest_item.availability and rest_item.product.id == order_item.product.id
             ]
 
             if not order.restaurants:
@@ -130,15 +130,17 @@ def view_orders(request):
         if None in order_coords:
             order.restaurant_distances_flag = False
         else:
-            order.restaurant_distances = []
+            restaurant_distances = []
             for restaurant in order.restaurants:
                 restaurant_place = places.get(restaurant.address)
                 restaurant_coords = restaurant_place.latitude, restaurant_place.longitude
                 restaurant_distance = round(
                     distance.distance(order_coords, restaurant_coords).km, 2
                 )
-                order.restaurant_distances.append([restaurant.name, restaurant_distance])
-            order.restaurant_distances.sort(key=lambda x: x[1])
+
+                restaurant_distances.append([restaurant.name, restaurant_distance])
+            restaurant_distances.sort(key=lambda x: x[1])
+            order.restaurant_distances = restaurant_distances
     return render(
         request,
         template_name='order_items.html',

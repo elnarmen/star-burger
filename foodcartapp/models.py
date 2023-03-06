@@ -6,6 +6,9 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.db.models import Prefetch
+from django.conf import settings
+from placesapp.models import Place
+from placesapp.location_utils import fetch_coordinates
 
 
 class Restaurant(models.Model):
@@ -212,6 +215,19 @@ class Order(models.Model):
     def clean(self):
         if self.cooking_restaurant and self.status == 'A':
             self.status = 'B'
+
+        place_coords = fetch_coordinates(
+                settings.YANDEX_GEOCODER_API_KEY,
+                self.address
+            )
+        place, created = Place.objects.get_or_create(address=self.address)
+
+        if created:
+            if not place_coords:
+                place.latitude = place.longitude = None
+                place.update_time = timezone.now()
+                return
+            place.latitude, place.longitude = place_coords
 
 
 class OrderProduct(models.Model):

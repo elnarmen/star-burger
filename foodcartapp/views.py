@@ -75,7 +75,6 @@ def register_order(request):
         address=serializer.validated_data['address']
     )
 
-    save_place(order.address)
 
     order_products = [OrderProduct(
         order=order,
