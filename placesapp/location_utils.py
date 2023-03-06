@@ -20,27 +20,24 @@ def fetch_coordinates(apikey, address):
 
     most_relevant = found_places[0]
     lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
-    return lon, lat
+    return lat, lon
 
 
-def get_place_coords(address):
+def save_place(address):
     geocoder_key = settings.YANDEX_GEOCODER_API_KEY
 
     place, created = Place.objects.get_or_create(
         address=address,
     )
-    if not created:
-        return place.latitude, place.longitude
 
-    place_coords = fetch_coordinates(
-        geocoder_key, address
-    )
+    if created:
+        place_coords = fetch_coordinates(geocoder_key, place.address)
 
-    if not place_coords:
-        place.longitude = place.latitude = None
-        return place.latitude, place.longitude
+        if not place_coords:
+            place.latitude = place.longitude = None
+            place.update_time = timezone.now()
+            place.save()
+            return
 
-    place.longitude, place.latitude = place_coords
-    place.update_time = timezone.now()
-    place.save()
-    return place.latitude, place.longitude
+        place.latitude, place.longitude = place_coords
+        place.save()

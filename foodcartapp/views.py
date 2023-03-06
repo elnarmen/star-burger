@@ -1,10 +1,13 @@
 import json
 from django.http import JsonResponse
+from django.conf import settings
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import OrderSerializer
 from .models import Product, Order, OrderProduct
+from placesapp.models import Place
+from placesapp.location_utils import save_place
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 
@@ -71,6 +74,9 @@ def register_order(request):
         phonenumber=serializer.validated_data['phonenumber'],
         address=serializer.validated_data['address']
     )
+
+    save_place(order.address)
+
     order_products = [OrderProduct(
         order=order,
         total_price=product_item['product'].price * product_item['quantity'],
@@ -81,3 +87,4 @@ def register_order(request):
     OrderProduct.objects.bulk_create(order_products)
 
     return Response(serializer.data, status=200)
+

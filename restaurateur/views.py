@@ -13,7 +13,7 @@ from django.contrib.auth import views as auth_views
 
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
 from placesapp.models import Place
-from placesapp.location_utils import fetch_coordinates, get_place_coords
+from placesapp.location_utils import fetch_coordinates, save_place
 
 class Login(forms.Form):
     username = forms.CharField(
@@ -96,13 +96,19 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders = Order.objects.annotate(total_cost=Sum('items__total_price'))\
+    orders = Order.objects\
+        .annotate(total_cost=Sum('items__total_price'))\
         .exclude(status='D')\
         .prefetch_related('cooking_restaurant', 'items', 'items__product')\
         .order_by('status')
 
     restaurant_menu_items = RestaurantMenuItem.objects.filter(availability=True)\
         .select_related('product', 'restaurant')
+
+    places = Place.objects.filter(
+        address__in=[order.address for order in orders] + [rest.address for rest in Restaurant.objects.all()]
+    )
+    places = {place.address: place for place in places}
 
     for order in orders:
         order.restaurants = set()
@@ -119,17 +125,17 @@ def view_orders(request):
                 continue
             order.restaurants &= set(product_restaurants)
 
-        customer_coords = get_place_coords(order.address)
-        if None in customer_coords:
+        order_place = places.get(order.address)
+        order_coords = order_place.latitude, order_place.latitude
+        if None in order_coords:
             order.restaurant_distances_flag = False
         else:
             order.restaurant_distances = []
             for restaurant in order.restaurants:
-                restaurant_coords = get_place_coords(
-                    restaurant.address
-                )
+                restaurant_place = places.get(restaurant.address)
+                restaurant_coords = restaurant_place.latitude, restaurant_place.longitude
                 restaurant_distance = round(
-                    distance.distance(customer_coords, restaurant_coords).km, 2
+                    distance.distance(order_coords, restaurant_coords).km, 2
                 )
                 order.restaurant_distances.append([restaurant.name, restaurant_distance])
             order.restaurant_distances.sort(key=lambda x: x[1])
