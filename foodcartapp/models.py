@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.db.models import Prefetch
 from django.conf import settings
 from placesapp.models import Place
-from placesapp.location_utils import fetch_coordinates
+from placesapp.location_utils import fetch_coordinates, save_place
 
 
 class Restaurant(models.Model):
@@ -131,6 +131,12 @@ class RestaurantMenuItem(models.Model):
         return f"{self.restaurant.name} - {self.product.name}"
 
 
+class OrderQuerySet(models.QuerySet):
+    def calculate_order_total_cost(self):
+        orders = self.annotate(total_cost=Sum(F('items__price') * F('items__quantity')))
+        return orders
+
+
 class Order(models.Model):
     STATUS_CHOICES = (
         ('A', 'Необработан'),
@@ -205,6 +211,9 @@ class Order(models.Model):
         blank=True,
         null=True
     )
+
+    objects = OrderQuerySet.as_manager()
+
     class Meta:
         verbose_name = 'заказ'
         verbose_name_plural = 'заказы'
@@ -216,18 +225,7 @@ class Order(models.Model):
         if self.cooking_restaurant and self.status == 'A':
             self.status = 'B'
 
-        place_coords = fetch_coordinates(
-                settings.YANDEX_GEOCODER_API_KEY,
-                self.address
-            )
-
-        place, _ = Place.objects.get_or_create(address=self.address)
-        if not place_coords:
-            place.latitude = place.longitude = None
-            place.update_time = timezone.now()
-            return
-        place.latitude, place.longitude = place_coords
-        place.save()
+        save_place(self.address)
 
 
 class OrderProduct(models.Model):
@@ -248,12 +246,13 @@ class OrderProduct(models.Model):
         on_delete=models.CASCADE,
     )
 
-    total_price = models.DecimalField(
-        'цена для общего количества одинаковых продуктов',
+    price = models.DecimalField(
+        'цена',
         max_digits=8,
         decimal_places=2,
         validators=[MinValueValidator(0)]
     )
+
 
     class Meta:
         verbose_name = 'заказанный продукт'

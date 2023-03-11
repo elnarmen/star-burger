@@ -13,7 +13,8 @@ from django.contrib.auth import views as auth_views
 
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
 from placesapp.models import Place
-from placesapp.location_utils import fetch_coordinates, save_place
+from placesapp.location_utils import fetch_coordinates
+
 
 class Login(forms.Form):
     username = forms.CharField(
@@ -93,14 +94,20 @@ def view_restaurants(request):
         'restaurants': Restaurant.objects.all(),
     })
 
+def get_product_restaurants(restaurant_menu_items, order_item):
+    """Рестораны, которые могут приготовить продукт из заказа"""
+    product_restaurants = [
+        rest_item.restaurant for rest_item in restaurant_menu_items
+        if rest_item.availability and rest_item.product.id == order_item.product.id
+    ]
+    return product_restaurants
 
-@user_passes_test(is_manager, login_url='restaurateur:login')
-def view_orders(request):
-    orders = Order.objects\
-        .annotate(total_cost=Sum('items__total_price'))\
-        .exclude(status='D')\
-        .prefetch_related('cooking_restaurant', 'items', 'items__product')\
-        .order_by('status')
+
+def get_orders_with_distances():
+    orders = Order.objects \
+        .exclude(status='D') \
+        .prefetch_related('cooking_restaurant', 'items', 'items__product') \
+        .order_by('status').calculate_order_total_cost()
 
     restaurant_menu_items = RestaurantMenuItem.objects.filter(availability=True)\
         .select_related('product', 'restaurant')
@@ -114,26 +121,32 @@ def view_orders(request):
         order.restaurants = set()
         order.restaurant_distances_flag = True
         for order_item in order.items.all():
-
-            product_restaurants = [
-                rest_item.restaurant for rest_item in restaurant_menu_items
-                if rest_item.availability and rest_item.product.id == order_item.product.id
-            ]
+            # получаем рестораны, готовые приготовить текущий продукт из заказа
+            product_restaurants = get_product_restaurants(
+                restaurant_menu_items,
+                order_item
+            )
 
             if not order.restaurants:
                 order.restaurants = set(product_restaurants)
                 continue
+            # из полученного списка определяем только рестораны,
+            # готовые приготовить и текущий, и остальные продукты
             order.restaurants &= set(product_restaurants)
 
         order_place = places.get(order.address)
-        order_coords = order_place.latitude, order_place.latitude
+        order_coords = order_place.latitude, order_place.longitude
         if None in order_coords:
+            # флаг будет использован в шаблоне для
+            # информирования о невозможности определения координат
             order.restaurant_distances_flag = False
         else:
+            # если удалось определить координаты, считаем растояния до каждого ресторана
             restaurant_distances = []
             for restaurant in order.restaurants:
                 restaurant_place = places.get(restaurant.address)
                 restaurant_coords = restaurant_place.latitude, restaurant_place.longitude
+
                 restaurant_distance = round(
                     distance.distance(order_coords, restaurant_coords).km, 2
                 )
@@ -141,6 +154,12 @@ def view_orders(request):
                 restaurant_distances.append([restaurant.name, restaurant_distance])
             restaurant_distances.sort(key=lambda x: x[1])
             order.restaurant_distances = restaurant_distances
+    return orders
+
+
+@user_passes_test(is_manager, login_url='restaurateur:login')
+def view_orders(request):
+    orders = get_orders_with_distances()
     return render(
         request,
         template_name='order_items.html',

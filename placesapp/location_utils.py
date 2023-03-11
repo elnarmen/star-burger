@@ -13,7 +13,11 @@ def fetch_coordinates(apikey, address):
         "format": "json",
     })
     response.raise_for_status()
-    found_places = response.json()['response']['GeoObjectCollection']['featureMember']
+
+    try:
+        found_places = response.json()['response']['GeoObjectCollection']['featureMember']
+    except (KeyError, ValueError):
+        return None
 
     if not found_places:
         return None
@@ -24,9 +28,24 @@ def fetch_coordinates(apikey, address):
 
 
 def save_place(address):
+    place, _ = Place.objects.get_or_create(address=address)
+    try:
+        place_coords = fetch_coordinates(
+            settings.YANDEX_GEOCODER_API_KEY,
+            address
+        )
+    except (requests.exceptions.HTTPError, requests.exceptions.RequestException):
+        place.latitude = place.longitude = None
+        place.update_time = timezone.now()
+        place.save()
+        return
 
-    place, created = Place.objects.get_or_create(
-        address=address,
-    )
-    place.clean()
+    if not place_coords:
+        place.latitude = place.longitude = None
+        place.update_time = timezone.now()
+        place.save()
+        return
+
+    place.latitude, place.longitude = place_coords
+    place.save()
 

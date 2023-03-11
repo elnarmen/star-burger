@@ -7,9 +7,9 @@ from rest_framework.response import Response
 from .serializers import OrderSerializer
 from .models import Product, Order, OrderProduct
 from placesapp.models import Place
-from placesapp.location_utils import save_place
 from django.shortcuts import get_object_or_404
 from django.db import transaction
+from placesapp.location_utils import save_place
 
 
 def banners_list_api(request):
@@ -67,21 +67,17 @@ def product_list_api(request):
 def register_order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
+    product_items = serializer.validated_data.pop('products')
+    order = serializer.create(serializer.validated_data)
 
-    order = Order.objects.create(
-        firstname=serializer.validated_data['firstname'],
-        lastname=serializer.validated_data['lastname'],
-        phonenumber=serializer.validated_data['phonenumber'],
-        address=serializer.validated_data['address']
-    )
-
+    save_place(order.address)
 
     order_products = [OrderProduct(
         order=order,
-        total_price=product_item['product'].price * product_item['quantity'],
+        price=product_item['product'].price,
         product=product_item['product'],
         quantity=product_item['quantity']
-    ) for product_item in serializer.validated_data['products']]
+    ) for product_item in product_items]
 
     OrderProduct.objects.bulk_create(order_products)
 
