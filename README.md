@@ -69,8 +69,16 @@ ROLLBAR_ENV - необязательная переменная, в которо
 ```
 ROLLBAR_ENV=ваше название окружения
 ```
-#### Создайте файл базы данных SQLite и отмигрируйте её следующей командой:
+#### Настройте использование PostgreSQL:
+С подробной инструкцией по установке можете ознакомиться на [сайте](https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-14-04). <br>
 
+После установки сформируйте url адрес вашей базы данных по шаблону:
+```
+postgres://<user>:<password>@localhost/<database_name>
+```
+Определите переменную окружения `DB_URL` в файле `.env` и сохраните в ней url базы данных
+
+Запустите миграции командой
 ```sh
 python manage.py migrate
 ```
