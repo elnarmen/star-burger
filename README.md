@@ -167,4 +167,5 @@ Parcel будет следить за файлами в каталоге `bundle
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
 - `YANDEX_GEOCODER_API_KEY` - [Получите в кабинете разработчика](https://developer.tech.yandex.ru/services/)
 
-Пример сайта: [elnar.tech](https://elnar.tech/)
+## Пример сайта 
+[elnar.tech](https://elnar.tech/)
