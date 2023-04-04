@@ -63,7 +63,7 @@ SECRET_KEY=django-insecure-0if40nf4nf93n4
 #### Переменные окружения для отслеживания ошибок сайта <br>
 Для получения ROLLBAR_TOKEN нужно зарегистрироваться на [сайте](https://rollbar.com) и выбрать framework Django.
 ```
-ROLLBAR_TOKEN=ваш секретный ключ rollbar
+ROLLBAR_TOKEN=ваш секретный ключ rollbar (необязательная переменная)
 ```
 ROLLBAR_ENV - необязательная переменная, в которой хранится название окружения. По умолчанию установлен режим разработки `development`.
 ```
@@ -165,7 +165,9 @@ Parcel будет следить за файлами в каталоге `bundle
 - `DEBUG` — дебаг-режим. Поставьте `False`.
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
-- `YANDEX_GEOCODER_API_KEY` - [Получите в кабинете разработчика](https://developer.tech.yandex.ru/services/)
-
+- `YANDEX_GEOCODER_API_KEY` — [Получите в кабинете разработчика](https://developer.tech.yandex.ru/services/)
+- `ROLLBAR_TOKEN` — ваш секретный ключ rollbar (необязательная переменная)
+- `ROLLBAR_ENV` — необязательная переменная, в которой хранится название окружения. По умолчанию установлен режим разработки `development`.
+- `DB_URL` — url адрес базы данных в PostgreSQL
 ## Пример сайта 
 [elnar.tech](https://elnar.tech/)
