@@ -13,7 +13,6 @@ from placesapp.location_utils import save_place
 
 
 def banners_list_api(request):
-    # FIXME move data to db?
     return JsonResponse([
         {
             'title': 'Burger',
@@ -39,7 +38,6 @@ def banners_list_api(request):
 @api_view(['GET'])
 def product_list_api(request):
     products = Product.objects.select_related('category').available()
-
     dumped_products = []
     for product in products:
         dumped_product = {
