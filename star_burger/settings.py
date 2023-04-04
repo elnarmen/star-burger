@@ -128,7 +128,7 @@ STATICFILES_DIRS = [
 YANDEX_GEOCODER_API_KEY = env.str('YANDEX_GEOCODER_API_KEY')
 
 ROLLBAR = {
-    'access_token': env('ROLLBAR_TOKEN'),
+    'access_token': env('ROLLBAR_TOKEN', None),
     'environment': env('ROLLBAR_ENV', 'development'),
     'branch': Repo().head.ref.name,
     'root': BASE_DIR,
