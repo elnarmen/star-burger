@@ -1,0 +1,42 @@
+version: "3"
+
+
+services:
+  db:
+    restart: always
+    image: "postgres:13-alpine"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ./backend/.env
+
+  web:
+    container_name: star_burger_web
+    build: ./backend
+    ports:
+      - "0.0.0.0:8080:8080"
+    volumes:
+      - ./media:/code/media
+      - /code/staticfiles
+      - ./backend:/code
+    depends_on:
+      - db
+    env_file:
+      - ./backend/.env
+
+  frontend:
+    container_name: star_burger_frontend
+    build: ./frontend
+    volumes:
+      - ./frontend/bundles-src/:/frontend/bundles-src/
+      - ./static/:/frontend/bundles/
+
+  nginx:
+    image: nginx:1.18.0-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+
+volumes:
+  postgres_data:
