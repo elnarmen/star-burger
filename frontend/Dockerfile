@@ -1,11 +1,11 @@
 FROM node:12.22-buster-slim
 
-WORKDIR /frontend
+WORKDIR /code/frontend
 
-COPY package.json package-lock.json /frontend/
+COPY package.json package-lock.json /code/frontend/
 
 RUN npm ci
 
-COPY bundles-src/ /frontend/bundles-src/
+COPY bundles-src/ /code/frontend/bundles-src/
 
-RUN /frontend/node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
+RUN /code/frontend/node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"

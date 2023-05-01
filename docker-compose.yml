@@ -8,28 +8,28 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
-      - ./backend/.env
+      - .env
 
   web:
     container_name: star_burger_web
-    build: ./backend
+    build: .
     ports:
       - "8080:8080"
     volumes:
       - ./media:/code/media
       - /code/staticfiles
-      - ./backend:/code
+      - .:/code
     depends_on:
       - db
     env_file:
-      - ./backend/.env
+      - .env
 
   frontend:
     container_name: star_burger_frontend
     build: ./frontend
     volumes:
-      - ./frontend/bundles-src/:/frontend/bundles-src/
-      - ./static/:/frontend/bundles/
+      - ./frontend/bundles-src/:/code/frontend/bundles-src/
+      - ./static/:/code/frontend/bundles/
 
   nginx:
     image: nginx:1.18.0-alpine
