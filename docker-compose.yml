@@ -14,7 +14,7 @@ services:
     container_name: star_burger_web
     build: ./backend
     ports:
-      - "0.0.0.0:8080:8080"
+      - "8080:8080"
     volumes:
       - ./media:/code/media
       - /code/staticfiles
