@@ -1,14 +1,15 @@
-FROM python:3.10
+# syntax=docker/dockerfile:1
 
-WORKDIR /code
+FROM python:3.8.3-alpine
 
-COPY requirements.txt .
+WORKDIR /star-burger
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+COPY /star-burger/requirements.txt requirements.txt
 
+RUN pip3 install --upgrade pip
 RUN pip install -r requirements.txt
 
 COPY . .
 
-RUN SECRET_KEY=NOT_IMPORTANT_VALUE python manage.py collectstatic --no-input
-
-CMD ["python", "-m", "gunicorn", "-b", "127.0.0.1:8080", "star_burger.wsgi:application"]
-
+RUN python star-burger/manage.py collectstatic --no-input --clear

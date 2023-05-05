@@ -3,7 +3,7 @@ import os
 import dj_database_url
 
 from environs import Env
-from git import Repo
+# from git import Repo
 
 
 env = Env()
@@ -16,7 +16,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', False)
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost', '0.0.0.0'])
 
 INSTALLED_APPS = [
     'foodcartapp.apps.FoodcartappConfig',
@@ -127,9 +127,9 @@ STATICFILES_DIRS = [
 
 YANDEX_GEOCODER_API_KEY = env.str('YANDEX_GEOCODER_API_KEY')
 
-ROLLBAR = {
-    'access_token': env('ROLLBAR_TOKEN', None),
-    'environment': env('ROLLBAR_ENV', 'development'),
-    'branch': Repo().head.ref.name,
-    'root': BASE_DIR,
-}
+# ROLLBAR = {
+#     'access_token': env('ROLLBAR_TOKEN', None),
+#     'environment': env('ROLLBAR_ENV', 'development'),
+#     'branch': Repo().head.ref.name,
+#     'root': BASE_DIR,
+# }

@@ -1,11 +1,15 @@
-FROM node:12.22-buster-slim
+FROM node:12
 
-WORKDIR /code/frontend
 
-COPY package.json package-lock.json /code/frontend/
+WORKDIR /star-burger
 
-RUN npm ci
+RUN npm install -g parcel@latest
 
-COPY bundles-src/ /code/frontend/bundles-src/
+COPY ./package-lock.json .
+COPY ./package.json .
 
-RUN /code/frontend/node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
+RUN npm install --also=dev
+
+COPY ./bundles-src/ ./bundles-src
+
+RUN parcel build bundles-src/index.js --dist-dir bundles --public-url="./"

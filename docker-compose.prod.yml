@@ -1,0 +1,51 @@
+version: '3.7'
+
+services:
+  web:
+    build: .
+    container_name: starburger_web
+    command: sh -c "gunicorn --bind 0.0.0.0:8000 --chdir /star-burger/star-burger/ star_burger.wsgi:application --reload"
+    volumes:
+      - static_volume:/star-burger/star-burger/static
+      - media_volume:/star-burger/star-burger/media
+      - bundles_volume:/star-burger/star-burger/bundles
+    restart: always
+    expose:
+      - 8000
+    depends_on:
+      - db
+  nginx:
+    image: nginx:1.21-alpine
+    container_name: starburger_nginx
+    volumes:
+      - static_volume:/star-burger/star-burger/static
+      - media_volume:/star-burger/star-burger/media
+      - conf:/etc/nginx/conf.d
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+  db:
+    image: postgres:13.0-alpine
+    container_name: db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    restart: always
+    env_file:
+      - ./star-burger/.env
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    volumes:
+      - static_volume:/star-burger/star-burger/static
+      - bundles_volume:/star-burger/bundles
+    depends_on:
+      - db
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  bundles_volume:
+  conf:

@@ -1,0 +1,39 @@
+version: '3.7'
+
+services:
+  web:
+    build: .
+    container_name: starburger_web
+    command: sh -c "python /star-burger/star-burger/manage.py runserver 0.0.0.0:8080"
+    volumes:
+      - .:/star-burger/
+      - static_volume:/star-burger/star-burger/static
+      - media_volume:/star-burger/star-burger/media
+      - bundles_volume:/star-burger/star-burger/bundles
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+  db:
+    image: postgres:12.0-alpine
+    container_name: db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    restart: always
+    env_file:
+      - ./star-burger/.env
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    volumes:
+      - static_volume:/star-burger/star-burger/static
+      - bundles_volume:/star-burger/bundles
+    depends_on:
+      - db
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  bundles_volume:
