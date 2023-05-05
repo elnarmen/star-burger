@@ -1,5 +1,5 @@
 bundles/**
-node_modules/
+/star-burger/node_modules/
 media/
 staticfiles/
 
