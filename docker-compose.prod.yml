@@ -27,13 +27,13 @@ services:
     depends_on:
       - web
   db:
-    image: postgres:12-alpine
+    image: postgres:12.0-alpine
     container_name: db
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     restart: always
     env_file:
-      - star-burger/.env
+      - ./star-burger/.env
   frontend:
     build:
       context: ./frontend
