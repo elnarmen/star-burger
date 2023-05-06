@@ -10,6 +10,6 @@ COPY ./package.json .
 
 RUN npm install --also=dev
 
-COPY ./bundles-src/ ./bundles-src
+COPY ./bundles-src/ ./bundles-src/
 
 RUN parcel build bundles-src/index.js --dist-dir bundles --public-url="./"

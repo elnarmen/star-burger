@@ -7,7 +7,6 @@ services:
     command: sh -c "gunicorn --bind 0.0.0.0:8000 --chdir /star-burger/star-burger/ star_burger.wsgi:application --reload"
     volumes:
       - static_volume:/star-burger/star-burger/static
-      - assets_volume:/star-burger/star-burger/assets
       - media_volume:/star-burger/star-burger/media
       - bundles_volume:/star-burger/star-burger/bundles
     restart: always
@@ -20,7 +19,6 @@ services:
     container_name: starburger_nginx
     volumes:
       - static_volume:/star-burger/star-burger/static
-      - assets_volume:/star-burger/star-burger/assets
       - media_volume:/star-burger/star-burger/media
       - conf:/etc/nginx/conf.d
     restart: always
@@ -42,14 +40,12 @@ services:
     container_name: frontend
     volumes:
       - static_volume:/star-burger/star-burger/static
-      - assets_volume:/star-burger/star-burger/assets
       - bundles_volume:/star-burger/bundles
     depends_on:
       - db
 volumes:
   postgres_data:
   static_volume:
-  assets_volume:
   media_volume:
   bundles_volume:
   conf:
