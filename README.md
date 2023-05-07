@@ -48,7 +48,7 @@ docker-compose -f docker-compose.dev.yml up
 docker-compose -f docker-compose.dev.yml exec web python star-burger/manage.py migrate
 ```
 
-Сайт будет доступен по адресу [http://127.0.0.1:8000/](http://127.0.0.1:8000/). 
+Сайт будет доступен по адресу [http://127.0.0.1:8080/](http://127.0.0.1:8080/). 
 
 ## prod-версия
 
