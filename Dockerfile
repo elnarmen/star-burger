@@ -12,4 +12,6 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
+ENV GIT_PYTHON_REFRESH=quiet
+
 RUN python star-burger/manage.py collectstatic --no-input --clear
