@@ -21,9 +21,11 @@ services:
       - static_volume:/star-burger/star-burger/static
       - media_volume:/star-burger/star-burger/media
       - conf:/etc/nginx/conf.d
+      - /etc/letsencrypt:/etc/letsencrypt
     restart: always
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - web
   db:
