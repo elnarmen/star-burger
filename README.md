@@ -26,7 +26,7 @@ git clone https://github.com/devmanorg/star-burger.git
 С подробной инструкцией по установке базы данных можете ознакомиться на [сайте](https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-14-04). <br>
 После установки сформируйте url адрес вашей базы данных по шаблону:
 ```
-postgres://<user>:<password>@localhost/<database_name>
+postgres://<user>:<password>@db/<database_name>
 ```
 
 #### Переменные окружения для отслеживания ошибок сайта (не обязательно) <br>
