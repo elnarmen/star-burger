@@ -3,7 +3,7 @@ import os
 import dj_database_url
 
 from environs import Env
-from git import Repo
+# from git import Repo
 
 
 env = Env()
@@ -126,10 +126,10 @@ STATICFILES_DIRS = [
 ]
 
 YANDEX_GEOCODER_API_KEY = env.str('YANDEX_GEOCODER_API_KEY')
-
-ROLLBAR = {
-    'access_token': env('ROLLBAR_TOKEN', None),
-    'environment': env('ROLLBAR_ENV', 'development'),
-    'branch': Repo().head.ref.name,
-    'root': BASE_DIR,
-}
+#
+# ROLLBAR = {
+#     'access_token': env('ROLLBAR_TOKEN', None),
+#     'environment': env('ROLLBAR_ENV', 'development'),
+#     'branch': Repo().head.ref.name,
+#     'root': BASE_DIR,
+# }
